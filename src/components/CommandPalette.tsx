@@ -8,7 +8,7 @@ import {
 } from "./ui/CommandPalette";
 import {
   CloudIcon,
-  CogIcon,
+  // CogIcon,
   Command,
   PlusCircleIcon,
   SaveIcon,
@@ -81,10 +81,10 @@ export default function CommandPalette() {
             <UserCircle2Icon className="mr-2" />
             <span>Account</span>
           </CommandItem>
-          <CommandItem>
+          {/* <CommandItem>
             <CogIcon size={18} className="mr-2" />
             <span>Settings</span>
-          </CommandItem>
+          </CommandItem> */}
           <CommandItem onSelect={() => itemHandler(switchTheme)}>
             <ThemeIcon iconSize={18} theme={theme} />
             <span className="ml-2">Switch theme</span>

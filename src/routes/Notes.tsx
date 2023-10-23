@@ -39,8 +39,8 @@ export default function Notes() {
   const navigate = useNavigate();
 
   const checkNotes = useCallback(() => {
-    if (!hasNotes()) navigate("/", { replace: true });
-  }, [hasNotes, navigate]);
+    if (!hasNotes() && isLoaded) navigate("/", { replace: true });
+  }, [hasNotes, isLoaded, navigate]);
 
   const deleteNote = (id: string) => {
     _deleteNote(id);
@@ -106,7 +106,7 @@ export default function Notes() {
           style={{ height: headerLogoSize }}
           className="flex items-center"
         >
-          {isLoaded ? (
+          {isLoaded || !user ? (
             <Logo className="h-full w-full" />
           ) : (
             <ActivityIndicator className="h-6 w-6" />

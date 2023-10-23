@@ -17,6 +17,7 @@ import { signUp } from "@/lib/auth";
 import { ActivityIndicator } from "@/components/ui/ActivityIndicator";
 import { useNotes } from "@/lib/state/notes";
 import { useUser } from "@/lib/state/auth";
+import { error } from "@/lib/toast";
 
 const formSchema = z.object({
   email: z.string().email({ message: "Invalid email" }),
@@ -53,12 +54,22 @@ export default function SignUp() {
     password,
     name,
   }: z.infer<typeof formSchema>) => {
-    await signUp(email, name ?? null, password).then(() => {
-      initNotes("");
-      initUser().then(() => {
-        navigate(params.get("redirect_url") ?? "/");
-      });
-    });
+    await signUp(email, name ?? null, password)
+      .then(() => {
+        initNotes("");
+        initUser().then(() => {
+          navigate(params.get("redirect_url") ?? "/");
+        });
+      })
+      .catch(
+        ({
+          response: {
+            data: { error: responseError },
+          },
+        }) => {
+          error(responseError);
+        }
+      );
   };
 
   return (

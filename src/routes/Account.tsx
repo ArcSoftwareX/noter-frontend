@@ -12,7 +12,7 @@ export default function Account() {
   const navigate = useNavigate();
   if (!user && !isLoading)
     return (
-      <div className="flex items-center justify-center flex-col">
+      <div className="flex items-center justify-center flex-col w-screen h-screen">
         <h1 className="text-xl font-bold mb-4">You are not signed in</h1>
         <Link
           to="/auth/sign-in?redirect_url=%2Faccount"

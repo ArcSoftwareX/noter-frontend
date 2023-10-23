@@ -14,6 +14,7 @@ import { ImagePlusIcon } from "lucide-react";
 import { changeAvatar as changeUserAvatar } from "@/lib/auth/actions";
 import { ChangeEvent, DragEvent, useRef, useState } from "react";
 import { createPortal } from "react-dom";
+import { error } from "@/lib/toast";
 
 export default function AvatarChange({
   avatar_id,
@@ -29,11 +30,21 @@ export default function AvatarChange({
     if (!selectedFile) return;
 
     setIsUploading(true);
-    changeUserAvatar(selectedFile).then((data) => {
-      setIsUploading(false);
-      setIsDialogOpen(false);
-      console.log(data);
-    });
+    changeUserAvatar(selectedFile)
+      .then(() => {
+        setIsUploading(false);
+        setIsDialogOpen(false);
+      })
+      .catch(
+        ({
+          response: {
+            data: { error: responseError },
+          },
+        }) => {
+          error(responseError);
+          setIsUploading(false);
+        }
+      );
   };
 
   const openFilePicker = () => {

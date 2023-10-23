@@ -2,8 +2,8 @@ import { createJSONStorage, persist } from "zustand/middleware";
 import { Note, empty } from "../notes/note";
 import { create } from "zustand";
 import { fetchNotes, syncNote, unsyncNote, updateNote } from "../notes";
-import { toast } from "sonner";
-import { AlertCircle, AlertCircleIcon, RefreshCwOffIcon } from "lucide-react";
+import { RefreshCwIcon, RefreshCwOffIcon } from "lucide-react";
+import { error, info } from "../toast";
 
 export type Notes = Record<string, Note>;
 
@@ -56,9 +56,7 @@ export const useNotes = create<Actions & State>()(
       delete: async (id) => {
         const { notes } = get();
 
-        if (notes[id].isCloud) {
-          await unsyncNote(id);
-        }
+        if (notes[id].isCloud) await unsyncNote(id);
 
         delete notes[id];
 
@@ -69,15 +67,12 @@ export const useNotes = create<Actions & State>()(
         isLoaded: false,
         isUpdating: false,
         initNotes: async (user) => {
-          if (!user)
-            return set((state) => ({
-              ...state,
-              cloud: { ...state.cloud, isLoaded: true },
-            }));
+          if (!user) return;
 
           const { cloud } = get();
 
           if (cloud.isLoaded) return;
+
           const cloudNotes = await fetchNotes();
 
           if (!cloudNotes) return;
@@ -92,15 +87,7 @@ export const useNotes = create<Actions & State>()(
 
           const syncRes = await syncNote(notes[id]);
 
-          if (!syncRes) {
-            toast(
-              <div className="flex items-center gap-4">
-                <AlertCircle className="h-5 w-5 text-destructive" />
-                <p>Failed to sync note</p>
-              </div>
-            );
-            return;
-          }
+          if (!syncRes) return error("Failed to sync note");
 
           const notesState: Record<string, Note> = {
             ...notes,
@@ -113,6 +100,8 @@ export const useNotes = create<Actions & State>()(
             ...state,
             notes: notesState,
           }));
+
+          return info("Note synced", <RefreshCwIcon className="h-5 w-5" />);
         },
 
         unsync: async (id) => {
@@ -120,13 +109,7 @@ export const useNotes = create<Actions & State>()(
 
           if (!notes[id]) return;
 
-          if (!(await unsyncNote(id)))
-            return toast(
-              <div className="flex items-center gap-4">
-                <AlertCircleIcon className="h-5 w-5 text-destructive" />
-                <p>Failed to unsync note</p>
-              </div>
-            );
+          if (!(await unsyncNote(id))) return error("Failed to unsync note");
 
           const notesState = {
             ...notes,
@@ -138,11 +121,9 @@ export const useNotes = create<Actions & State>()(
             notes: notesState,
           }));
 
-          return toast(
-            <div className="flex items-center gap-4">
-              <RefreshCwOffIcon className="h-5 w-5" />
-              <p>Note unsynced</p>
-            </div>
+          return info(
+            "Note unsynced",
+            <RefreshCwOffIcon className="h-5 w-5" />
           );
         },
 
@@ -158,13 +139,7 @@ export const useNotes = create<Actions & State>()(
 
           const updateRes = await updateNote(id, note);
 
-          if (!updateRes)
-            toast(
-              <div className="flex items-center gap-4">
-                <AlertCircle className="h-5 w-5 text-destructive" />
-                <p>Failed to update this note</p>
-              </div>
-            );
+          if (!updateRes) error("Failed to update the note");
 
           set((state) => ({
             ...state,
@@ -179,8 +154,6 @@ export const useNotes = create<Actions & State>()(
         fromArray: (notes) => {
           const res: Record<string, Note> = {};
           for (const n of notes) res[n.id] = { ...n, isCloud: true };
-
-          console.log(res);
 
           set((state) => ({
             ...state,
